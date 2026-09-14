@@ -1,1 +1,409 @@
-انا رقم ٢ يا ابن قلبي
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>جاري الدخول...</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;900&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-1:#05080f;
+    --bg-2:#0d1523;
+    --gold:#FFD86B;
+    --gold-soft:#FFF6D6;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html,body{
+    height:100%;
+    overflow:hidden;
+    background:var(--bg-1);
+  }
+
+  body{
+    font-family:"Cairo", Tahoma, sans-serif;
+    color:#fff;
+    background:
+      radial-gradient(circle at 50% 44%, rgba(255,216,107,.10), transparent 58%),
+      radial-gradient(circle at 50% 130%, rgba(120,200,255,.07), transparent 60%),
+      linear-gradient(160deg, var(--bg-2) 0%, var(--bg-1) 65%);
+  }
+
+  /* طبقة النقاط */
+  #fx{
+    position:fixed; inset:0;
+    display:block;
+  }
+
+  /* طبقة الواجهة */
+  .ui{
+    position:fixed; inset:0;
+    pointer-events:none;
+  }
+
+  /* شريط التحميل */
+  .loader-wrap{
+    position:absolute;
+    left:50%; top:62%;
+    transform:translateX(-50%);
+    width:min(320px, 62vw);
+    opacity:0;
+    animation: fadeIn .6s ease .1s forwards;
+  }
+
+  .track{
+    width:100%;
+    height:3px;
+    background:rgba(255,255,255,.07);
+    border-radius:99px;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .track::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent, rgba(255,216,107,.25), transparent);
+    animation: shimmer 2.2s linear infinite;
+  }
+
+  #bar{
+    width:0%;
+    height:100%;
+    border-radius:99px;
+    background:linear-gradient(90deg, #FFB347, #FFD86B 55%, #FFF6D6);
+    box-shadow:0 0 14px rgba(255,216,107,.85), 0 0 34px rgba(255,216,107,.35);
+    transition: width 1000ms cubic-bezier(.55,.06,.2,1);
+  }
+
+  .bar-label{
+    margin-top:12px;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:3px;
+    color:rgba(255,246,214,.42);
+    font-weight:400;
+  }
+
+  /* رسالة الترحيب */
+  .welcome{
+    position:absolute;
+    left:0; right:0; top:71%;
+    text-align:center;
+    padding:0 20px;
+    opacity:0;
+    transform:translateY(14px);
+    transition: opacity .75s ease, transform .75s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .welcome.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .welcome .small{
+    display:block;
+    font-size:13px;
+    font-weight:400;
+    letter-spacing:2px;
+    color:rgba(255,255,255,.55);
+    margin-bottom:6px;
+  }
+
+  .welcome .shop{
+    display:block;
+    font-size:clamp(17px, 4.6vw, 24px);
+    font-weight:900;
+    background:linear-gradient(90deg,#FFD86B,#FFF6D6,#FFB347);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 14px rgba(255,216,107,.45));
+  }
+
+  /* هالة خفيفة أسفل الشاشة */
+  .vignette{
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 50%, transparent 45%, rgba(0,0,0,.55) 100%);
+    pointer-events:none;
+  }
+
+  @keyframes shimmer{
+    0%{ transform:translateX(-100%); }
+    100%{ transform:translateX(100%); }
+  }
+
+  @keyframes fadeIn{
+    to{ opacity:1; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+
+<div class="ui">
+  <div class="vignette"></div>
+
+  <div class="loader-wrap">
+    <div class="track"><div id="bar"></div></div>
+    <div class="bar-label">LOADING</div>
+  </div>
+
+  <div class="welcome" id="welcome">
+    <span class="small">أهلاً بك في</span>
+    <span class="shop" id="welcomeName"></span>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ⚙️  الإعدادات — غيّر القيم دي بس
+   ============================================================ */
+const CONFIG = {
+  // اسم المحل (يظهر بالنقاط + في رسالة الترحيب)
+  shopName: "ELGENIUS",
+
+  // الـ Place ID بتاع جوجل (اللي بيتبدل مكان كلمة "متغير")
+  placeId: "ChIJ2zSXW1pHWBQRgvdTz",
+
+  // مدة الأنيميشن كاملة بالملي ثانية
+  duration: 4000,
+
+  // توقيت ظهور شريط التحميل ورسالة الترحيب
+  barStart: 1500,
+  welcomeAt: 2050,
+
+  // ألوان النقاط
+  colors: ["#FFD86B", "#FFB347", "#FFF6D6", "#7FD8FF", "#FFFFFF"]
+};
+/* ============================================================ */
+
+
+const canvas = document.getElementById('fx');
+const ctx = canvas.getContext('2d');
+
+let W = 0, H = 0, DPR = 1;
+let particles = [];
+let startTime = 0;
+
+const TEXT_CENTER_Y = 0.42; // مكان الاسم رأسيًا
+
+
+/* ---------- تهيئة الكانفس ---------- */
+function setupCanvas(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width  = Math.floor(W * DPR);
+  canvas.height = Math.floor(H * DPR);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+
+/* ---------- استخراج نقاط الاسم من النص ---------- */
+function sampleText(text){
+  const off = document.createElement('canvas');
+  off.width = W;
+  off.height = H;
+  const o = off.getContext('2d');
+  const FONT = '"Cairo", Tahoma, sans-serif';
+
+  let fs = Math.min(H * 0.30, W * 0.20);
+  fs = Math.max(fs, 34);
+
+  o.textAlign = 'center';
+  o.textBaseline = 'middle';
+  o.font = `900 ${fs}px ${FONT}`;
+
+  // تصغير الخط لو الاسم طويل
+  const maxW = W * 0.82;
+  const measured = o.measureText(text).width;
+  if (measured > maxW){
+    fs = fs * (maxW / measured);
+    o.font = `900 ${fs}px ${FONT}`;
+  }
+
+  o.fillStyle = '#fff';
+  o.fillText(text, W / 2, H * TEXT_CENTER_Y);
+
+  const data = o.getImageData(0, 0, W, H).data;
+  const pts = [];
+  const step = Math.max(3, Math.round(Math.min(W, H) / 200));
+
+  for (let y = 0; y < H; y += step){
+    for (let x = 0; x < W; x += step){
+      if (data[(y * W + x) * 4 + 3] > 128){
+        pts.push({ x, y });
+      }
+    }
+  }
+
+  // حد أقصى لعدد النقاط للأداء
+  const MAX = 2600;
+  if (pts.length > MAX){
+    const out = [];
+    const ratio = pts.length / MAX;
+    for (let i = 0; i < pts.length; i += ratio) out.push(pts[Math.floor(i)]);
+    return out;
+  }
+  return pts;
+}
+
+
+/* ---------- بناء النقاط الطايرة ---------- */
+function buildParticles(pts){
+  const cx = W / 2;
+  const cy = H * TEXT_CENTER_Y;
+  const maxR = Math.hypot(W, H) * 0.62 + 90;
+  const colors = CONFIG.colors;
+
+  particles = pts.map(p => {
+    const ang = Math.random() * Math.PI * 2;
+    const rad = maxR * (0.75 + Math.random() * 0.55);
+
+    return {
+      sx: cx + Math.cos(ang) * rad,
+      sy: cy + Math.sin(ang) * rad,
+      tx: p.x,
+      ty: p.y,
+      size: 0.7 + Math.random() * 1.3,
+      delay: Math.random() * 320,
+      dur: 850 + Math.random() * 520,
+      color: colors[(Math.random() * colors.length) | 0],
+      phase: Math.random() * Math.PI * 2
+    };
+  });
+}
+
+
+/* ---------- حساب مكان النقطة في لحظة معينة ---------- */
+function posAt(p, t){
+  const local = (t - p.delay) / p.dur;
+  let e;
+  if (local <= 0) e = 0;
+  else if (local >= 1) e = 1;
+  else e = 1 - Math.pow(1 - local, 3); // ease out cubic
+
+  return {
+    x: p.sx + (p.tx - p.sx) * e,
+    y: p.sy + (p.ty - p.sy) * e,
+    e: e
+  };
+}
+
+
+/* ---------- حلقة الرسم ---------- */
+function loop(now){
+  if (!startTime) startTime = now;
+  const t = now - startTime;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+
+  const settled = t > 1750;
+
+  for (let i = 0; i < particles.length; i++){
+    const p = particles[i];
+    const a = posAt(p, t);
+    const b = posAt(p, t - 50);
+
+    let ax = a.x, ay = a.y;
+
+    // رفة خفيفة بعد ما يستقر الشكل
+    if (settled && a.e >= 1){
+      ax += Math.sin(t * 0.0020 + p.phase) * 0.55;
+      ay += Math.cos(t * 0.0023 + p.phase) * 0.55;
+    }
+
+    const alpha = Math.min(1, a.e * 1.2);
+    if (alpha <= 0.01) continue;
+
+    // الذيل (الخط اللي ورا النقطة)
+    ctx.globalAlpha = alpha * 0.32;
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = p.size * 0.9;
+    ctx.beginPath();
+    ctx.moveTo(b.x, b.y);
+    ctx.lineTo(ax, ay);
+    ctx.stroke();
+
+    // رأس النقطة
+    ctx.globalAlpha = alpha * 0.95;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(ax, ay, p.size, 0, 6.2832);
+    ctx.fill();
+  }
+
+  // هالة ذهبية بعد اكتمال الاسم
+  if (settled){
+    const k = Math.min(1, (t - 1750) / 600);
+    const g = ctx.createRadialGradient(
+      W / 2, H * TEXT_CENTER_Y, 0,
+      W / 2, H * TEXT_CENTER_Y, Math.min(W, H) * 0.48
+    );
+    g.addColorStop(0, `rgba(255,216,107,${0.11 * k})`);
+    g.addColorStop(1, 'rgba(255,216,107,0)');
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+
+  requestAnimationFrame(loop);
+}
+
+
+/* ---------- جدولة العناصر والتحويل ---------- */
+function scheduleDOM(){
+  const bar = document.getElementById('bar');
+  const welcome = document.getElementById('welcome');
+  const welcomeName = document.getElementById('welcomeName');
+
+  welcomeName.textContent = CONFIG.shopName;
+
+  setTimeout(() => { bar.style.width = '100%'; }, CONFIG.barStart);
+  setTimeout(() => { welcome.classList.add('show'); }, CONFIG.welcomeAt);
+
+  setTimeout(() => {
+    const url = 'https://search.google.com/local/writereview?placeid=' +
+                encodeURIComponent(CONFIG.placeId);
+    window.location.replace(url);
+  }, CONFIG.duration);
+}
+
+
+/* ---------- التشغيل ---------- */
+async function init(){
+  // استنى الخط يتحمّل (بحد أقصى 800ms)
+  try {
+    await Promise.race([
+      document.fonts.load('900 100px Cairo'),
+      new Promise(r => setTimeout(r, 800))
+    ]);
+  } catch(e){}
+
+  setupCanvas();
+
+  const pts = sampleText(CONFIG.shopName);
+  buildParticles(pts);
+
+  requestAnimationFrame(loop);
+  scheduleDOM();
+}
+
+init();
+</script>
+</body>
+</html>
