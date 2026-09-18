@@ -90,6 +90,29 @@
     font-weight:400;
   }
 
+  /* اللوجو */
+  .logo-wrap{
+    position:absolute;
+    left:50%; top:14%;
+    transform:translate(-50%, -18px);
+    width:min(180px, 38vw);
+    opacity:0;
+    transition: opacity 1s ease, transform 1s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .logo-wrap.show{
+    opacity:1;
+    transform:translate(-50%, 0);
+  }
+
+  .logo-wrap img{
+    width:100%;
+    height:auto;
+    display:block;
+    filter:drop-shadow(0 0 22px rgba(255,216,107,.45))
+           drop-shadow(0 0 8px rgba(255,216,107,.30));
+  }
+
   /* رسالة الترحيب */
   .welcome{
     position:absolute;
@@ -126,6 +149,15 @@
     filter:drop-shadow(0 0 14px rgba(255,216,107,.45));
   }
 
+  .welcome .sub{
+    display:block;
+    margin-top:4px;
+    font-size:clamp(11px, 3vw, 14px);
+    font-weight:400;
+    letter-spacing:1px;
+    color:rgba(255,246,214,.65);
+  }
+
   /* هالة خفيفة أسفل الشاشة */
   .vignette{
     position:absolute; inset:0;
@@ -150,6 +182,11 @@
 <div class="ui">
   <div class="vignette"></div>
 
+  <!-- اللوجو -->
+  <div class="logo-wrap" id="logoWrap">
+    <img src="logo.png" alt="logo">
+  </div>
+
   <div class="loader-wrap">
     <div class="track"><div id="bar"></div></div>
     <div class="bar-label">LOADING</div>
@@ -158,6 +195,7 @@
   <div class="welcome" id="welcome">
     <span class="small">أهلاً بك في</span>
     <span class="shop" id="welcomeName"></span>
+    <span class="sub">للمراتب والمفروشات</span>
   </div>
 </div>
 
@@ -178,6 +216,10 @@ const CONFIG = {
   // توقيت ظهور شريط التحميل ورسالة الترحيب
   barStart: 1500,
   welcomeAt: 2050,
+
+  // توقيت ظهور اللوجو
+  logoShow: 400,
+  logoHide: 1900,
 
   // ألوان النقاط
   colors: ["#FFD86B", "#FFB347", "#FFF6D6", "#7FD8FF", "#FFFFFF"]
@@ -370,8 +412,15 @@ function scheduleDOM(){
   const bar = document.getElementById('bar');
   const welcome = document.getElementById('welcome');
   const welcomeName = document.getElementById('welcomeName');
+  const logoWrap = document.getElementById('logoWrap');
 
   welcomeName.textContent = CONFIG.shopName;
+
+  // ظهور اللوجو
+  setTimeout(() => { logoWrap.classList.add('show'); }, CONFIG.logoShow);
+
+  // اختفاء اللوجو
+  setTimeout(() => { logoWrap.classList.remove('show'); }, CONFIG.logoHide);
 
   setTimeout(() => { bar.style.width = '100%'; }, CONFIG.barStart);
   setTimeout(() => { welcome.classList.add('show'); }, CONFIG.welcomeAt);
