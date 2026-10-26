@@ -1,1 +1,437 @@
-انا رقم ٣ يا صحبي
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Elgenius | جاري التوجيه...</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;900&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-1:#050505;
+    --bg-2:#120202;
+    --red:#FF1A1A;
+    --red-soft:#FF6B6B;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html,body{
+    height:100%;
+    overflow:hidden;
+    background:var(--bg-1);
+  }
+
+  body{
+    font-family:"Cairo", Tahoma, sans-serif;
+    color:#fff;
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255,26,26,.12), transparent 55%),
+      radial-gradient(circle at 50% 120%, rgba(255,0,0,.08), transparent 60%),
+      linear-gradient(160deg, var(--bg-2) 0%, var(--bg-1) 70%);
+  }
+
+  #fx{
+    position:fixed; inset:0;
+    display:block;
+    z-index:1;
+  }
+
+  /* اللوجو اللي هيظهر فوق النص */
+  .logo-overlay {
+    position: fixed;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    width: 50%; /* يتظبط حسب حجم اللوجو */
+    max-width: 400px;
+    opacity: 0;
+    z-index: 2;
+    transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  .logo-overlay img {
+    width: 100%;
+    height: auto;
+    mask-image: radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 95%);
+    -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 95%);
+    filter: drop-shadow(0 0 20px rgba(255, 26, 26, 0.6));
+  }
+
+  .logo-overlay.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .ui{
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index: 3;
+  }
+
+  .loader-wrap{
+    position:absolute;
+    left:50%; top:62%;
+    transform:translateX(-50%);
+    width:min(320px, 62vw);
+    opacity:0;
+    animation: fadeIn .6s ease .1s forwards;
+  }
+
+  .track{
+    width:100%;
+    height:3px;
+    background:rgba(255,255,255,.07);
+    border-radius:99px;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .track::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent, rgba(255,26,26,.3), transparent);
+    animation: shimmer 2.2s linear infinite;
+  }
+
+  #bar{
+    width:0%;
+    height:100%;
+    border-radius:99px;
+    background:linear-gradient(90deg, #8B0000, #FF1A1A 55%, #FF6B6B);
+    box-shadow:0 0 14px rgba(255,26,26,.85), 0 0 34px rgba(255,26,26,.35);
+    transition: width 1000ms cubic-bezier(.55,.06,.2,1);
+  }
+
+  .bar-label{
+    margin-top:12px;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:3px;
+    color:rgba(255,255,255,.42);
+    font-weight:400;
+  }
+
+  .welcome{
+    position:absolute;
+    left:0; right:0; top:71%;
+    text-align:center;
+    padding:0 20px;
+    opacity:0;
+    transform:translateY(14px);
+    transition: opacity .75s ease, transform .75s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .welcome.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .welcome .small{
+    display:block;
+    font-size:13px;
+    font-weight:400;
+    letter-spacing:2px;
+    color:rgba(255,255,255,.55);
+    margin-bottom:6px;
+  }
+
+  .welcome .shop{
+    display:block;
+    font-size:clamp(17px, 4.6vw, 24px);
+    font-weight:900;
+    background:linear-gradient(90deg,#FF1A1A,#FF6B6B,#FF1A1A);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 14px rgba(255,26,26,.5));
+  }
+
+  .vignette{
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 50%, transparent 45%, rgba(0,0,0,.65) 100%);
+    pointer-events:none;
+  }
+
+  @keyframes shimmer{
+    0%{ transform:translateX(-100%); }
+    100%{ transform:translateX(100%); }
+  }
+
+  @keyframes fadeIn{
+    to{ opacity:1; }
+  }
+
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+
+<!-- اللوجو -->
+<div class="logo-overlay" id="logoOverlay">
+  <img src="logop.png" alt="Elgenius Logo">
+</div>
+
+<div class="ui">
+  <div class="vignette"></div>
+
+  <div class="loader-wrap">
+    <div class="track"><div id="bar"></div></div>
+    <div class="bar-label">SECURE CONNECTION</div>
+  </div>
+
+  <div class="welcome" id="welcome">
+    <span class="small">أهلاً بك في</span>
+    <span class="shop" id="welcomeName"></span>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ⚙️  الإعدادات
+   ============================================================ */
+const CONFIG = {
+  shopName: "ELGENIUS",
+
+  // 🔗 رابط التقييم بتاع جوجل
+  redirectUrl: "https://search.google.com/local/writereview?placeid=ChIJ2zSXW1pHWBQRgvdTz-x--5o&source=g.page.m.np._&laa=nmx-review-solicitation-promoted-recommendation-card",
+
+  // مدة الأنيميشن (هنا 6 ثواني عشان اللوجو يظهر)
+  duration: 6000,
+
+  barStart: 1500,
+  welcomeAt: 2000,
+  logoAt: 2500, // اللوجو يظهر بعد ما النقاط تتجمع
+
+  // ألوان النقاط (أحمر ناري - يناسب اللوجو)
+  colors: ["#FF1A1A", "#FF6B6B", "#FFFFFF", "#8B0000", "#FF9999"]
+};
+/* ============================================================ */
+
+
+const canvas = document.getElementById('fx');
+const ctx = canvas.getContext('2d');
+
+let W = 0, H = 0, DPR = 1;
+let particles = [];
+let startTime = 0;
+let redirected = false;
+
+const TEXT_CENTER_Y = 0.42;
+
+
+function setupCanvas(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width  = Math.floor(W * DPR);
+  canvas.height = Math.floor(H * DPR);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+
+function sampleText(text){
+  const off = document.createElement('canvas');
+  off.width = W;
+  off.height = H;
+  const o = off.getContext('2d');
+  const FONT = '"Cairo", Tahoma, sans-serif';
+
+  let fs = Math.min(H * 0.30, W * 0.20);
+  fs = Math.max(fs, 34);
+
+  o.textAlign = 'center';
+  o.textBaseline = 'middle';
+  o.font = `900 ${fs}px ${FONT}`;
+
+  const maxW = W * 0.82;
+  const measured = o.measureText(text).width;
+  if (measured > maxW){
+    fs = fs * (maxW / measured);
+    o.font = `900 ${fs}px ${FONT}`;
+  }
+
+  o.fillStyle = '#fff';
+  o.fillText(text, W / 2, H * TEXT_CENTER_Y);
+
+  const data = o.getImageData(0, 0, W, H).data;
+  const pts = [];
+  // زيادة الكثافة شوية عشان الاسم يطلع واضح أكتر
+  const step = Math.max(3, Math.round(Math.min(W, H) / 220));
+
+  for (let y = 0; y < H; y += step){
+    for (let x = 0; x < W; x += step){
+      if (data[(y * W + x) * 4 + 3] > 128){
+        pts.push({ x, y });
+      }
+    }
+  }
+
+  const MAX = 3000; // زيادة الحد الأقصى عشان كثافة أعلى
+  if (pts.length > MAX){
+    const out = [];
+    const ratio = pts.length / MAX;
+    for (let i = 0; i < pts.length; i += ratio) out.push(pts[Math.floor(i)]);
+    return out;
+  }
+  return pts;
+}
+
+
+function buildParticles(pts){
+  const cx = W / 2;
+  const cy = H * TEXT_CENTER_Y;
+  const maxR = Math.hypot(W, H) * 0.62 + 90;
+  const colors = CONFIG.colors;
+
+  particles = pts.map(p => {
+    const ang = Math.random() * Math.PI * 2;
+    const rad = maxR * (0.75 + Math.random() * 0.55);
+
+    return {
+      sx: cx + Math.cos(ang) * rad,
+      sy: cy + Math.sin(ang) * rad,
+      tx: p.x,
+      ty: p.y,
+      size: 0.7 + Math.random() * 1.3,
+      delay: Math.random() * 320,
+      dur: 850 + Math.random() * 520,
+      color: colors[(Math.random() * colors.length) | 0],
+      phase: Math.random() * Math.PI * 2
+    };
+  });
+}
+
+
+function posAt(p, t){
+  const local = (t - p.delay) / p.dur;
+  let e;
+  if (local <= 0) e = 0;
+  else if (local >= 1) e = 1;
+  else e = 1 - Math.pow(1 - local, 3);
+
+  return {
+    x: p.sx + (p.tx - p.sx) * e,
+    y: p.sy + (p.ty - p.sy) * e,
+    e: e
+  };
+}
+
+
+function loop(now){
+  if (!startTime) startTime = now;
+  const t = now - startTime;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+
+  const settled = t > 1750;
+
+  for (let i = 0; i < particles.length; i++){
+    const p = particles[i];
+    const a = posAt(p, t);
+    const b = posAt(p, t - 50);
+
+    let ax = a.x, ay = a.y;
+
+    if (settled && a.e >= 1){
+      ax += Math.sin(t * 0.0020 + p.phase) * 0.55;
+      ay += Math.cos(t * 0.0023 + p.phase) * 0.55;
+    }
+
+    const alpha = Math.min(1, a.e * 1.2);
+    if (alpha <= 0.01) continue;
+
+    ctx.globalAlpha = alpha * 0.32;
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = p.size * 0.9;
+    ctx.beginPath();
+    ctx.moveTo(b.x, b.y);
+    ctx.lineTo(ax, ay);
+    ctx.stroke();
+
+    ctx.globalAlpha = alpha * 0.95;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(ax, ay, p.size, 0, 6.2832);
+    ctx.fill();
+  }
+
+  if (settled){
+    const k = Math.min(1, (t - 1750) / 600);
+    const g = ctx.createRadialGradient(
+      W / 2, H * TEXT_CENTER_Y, 0,
+      W / 2, H * TEXT_CENTER_Y, Math.min(W, H) * 0.48
+    );
+    // التوهج بقى أحمر
+    g.addColorStop(0, `rgba(255,26,26,${0.12 * k})`);
+    g.addColorStop(1, 'rgba(255,26,26,0)');
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+
+  requestAnimationFrame(loop);
+}
+
+
+function goToReview(){
+  if (redirected) return;
+  redirected = true;
+  window.location.href = CONFIG.redirectUrl;
+}
+
+
+function scheduleDOM(){
+  const bar = document.getElementById('bar');
+  const welcome = document.getElementById('welcome');
+  const welcomeName = document.getElementById('welcomeName');
+  const logoOverlay = document.getElementById('logoOverlay');
+
+  welcomeName.textContent = CONFIG.shopName;
+
+  setTimeout(() => { bar.style.width = '100%'; }, CONFIG.barStart);
+  setTimeout(() => { welcome.classList.add('show'); }, CONFIG.welcomeAt);
+  
+  // ظهور اللوجو بعد ما النقاط تتجمع
+  setTimeout(() => { logoOverlay.classList.add('show'); }, CONFIG.logoAt);
+
+  // التحويل
+  setTimeout(goToReview, CONFIG.duration);
+  setTimeout(goToReview, CONFIG.duration + 1500);
+}
+
+
+async function init(){
+  try {
+    await Promise.race([
+      document.fonts.load('900 100px Cairo'),
+      new Promise(r => setTimeout(r, 800))
+    ]);
+  } catch(e){}
+
+  setupCanvas();
+
+  const pts = sampleText(CONFIG.shopName);
+  buildParticles(pts);
+
+  requestAnimationFrame(loop);
+  scheduleDOM();
+}
+
+init();
+</script>
+</body>
+</html>
