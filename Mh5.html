@@ -1,1 +1,427 @@
-انا ميتين ام رقم ٥ هاا
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elgenius | Vodafone Cash</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #030000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        /* خلفية خطوط سرعة */
+        .speed-lines {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 40px,
+                rgba(255, 0, 0, 0.05) 40px,
+                rgba(255, 0, 0, 0.05) 41px
+            );
+            animation: moveLines 2s linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes moveLines {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 0; }
+        }
+
+        #particles {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* الاسم بتأثير Digital */
+        .name-container {
+            position: absolute;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 8vw, 6rem);
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 40px #ff0000;
+            opacity: 0;
+            display: flex;
+            gap: 2px;
+            direction: ltr;
+        }
+
+        .letter {
+            opacity: 0;
+            transform: translateY(20px);
+            display: inline-block;
+        }
+
+        /* اللوجو مع تأثير الليزر */
+        .logo-container {
+            position: absolute;
+            width: 90%;
+            max-width: 600px;
+            opacity: 0;
+            clip-path: inset(0 100% 0 0); /* يبدأ مخفي */
+            transition: clip-path 1.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.5s;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            mix-blend-mode: screen;
+            mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 95%);
+            -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 95%);
+        }
+
+        .logo-container.show {
+            opacity: 1;
+            clip-path: inset(0 0 0 0); /* يظهر بالكامل */
+        }
+
+        /* كلام فودافون كاش */
+        .info-container {
+            position: absolute;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease-out;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .vf-brand {
+            background: #e60000;
+            color: #fff;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: 10px;
+            box-shadow: 0 0 20px rgba(230, 0, 0, 0.6);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vf-brand svg {
+            width: 24px;
+            height: 24px;
+            fill: #fff;
+        }
+
+        .main-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            color: #fff;
+            margin-bottom: 5px;
+            font-weight: 900;
+        }
+
+        .sub-title {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            color: #ff4d4d;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .features span {
+            background: rgba(230, 0, 0, 0.1);
+            border: 1px solid #e60000;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            font-weight: 700;
+            animation: slideIn 1s ease forwards;
+            opacity: 0;
+            color: #ff4d4d;
+        }
+
+        .features span:nth-child(1) { animation-delay: 0.2s; }
+        .features span:nth-child(2) { animation-delay: 0.4s; }
+        .features span:nth-child(3) { animation-delay: 0.6s; }
+
+        /* بوكس التحويل */
+        .payment-btn {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            font-weight: 900;
+            background: #e60000;
+            color: #fff;
+            padding: 15px 40px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 0 30px rgba(230, 0, 0, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            animation: pulseBtn 2s infinite;
+        }
+
+        .payment-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 20%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(45deg);
+            animation: shine 2.5s infinite;
+        }
+
+        .timer {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 1rem;
+            color: #e60000;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .timer.show { opacity: 1; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes shine {
+            0% { left: -50%; }
+            20% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        @keyframes pulseBtn {
+            0% { box-shadow: 0 0 0 0 rgba(230, 0, 0, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(230, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(230, 0, 0, 0); }
+        }
+
+        /* وميض أحمر */
+        .flash {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #ff0000;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flash" id="flash"></div>
+    <div class="speed-lines"></div>
+    <canvas id="particles"></canvas>
+
+    <div class="container">
+        <!-- الاسم -->
+        <div class="name-container" id="nameContainer"></div>
+
+        <!-- اللوجو -->
+        <div class="logo-container" id="logoContainer">
+            <img src="logop.png" alt="Elgenius Logo">
+        </div>
+
+        <!-- كلام فودافون -->
+        <div class="info-container" id="infoContainer">
+            <!-- علامة فودافون كاش -->
+            <div class="vf-brand">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                Vodafone Cash
+            </div>
+            
+            <div class="main-title">تحويل فوري وآمن</div>
+            <div class="sub-title">عبر محفظة فودافون كاش</div>
+            
+            <div class="features">
+                <span>تحويل لحظي</span>
+                <span>بدون رسوم</span>
+                <span>أمان تام</span>
+            </div>
+
+            <div class="payment-btn">
+                اضغط للتحويل الآن
+            </div>
+        </div>
+    </div>
+
+    <div class="timer" id="timer">REDIRECT: 11</div>
+
+    <script>
+        const NAME = "Elgenius";
+        const PAY_LINK = "https://vf.eg/vfcash?id=mt&qrId=jjXVSG";
+        const totalTime = 11000; // 11 ثانية
+        const timerDisplay = document.getElementById('timer');
+        let countdown = 11;
+
+        // 1. الاسم بيظهر
+        const nameContainer = document.getElementById('nameContainer');
+        NAME.split('').forEach((char, index) => {
+            const span = document.createElement('span');
+            span.className = 'letter';
+            span.textContent = char;
+            nameContainer.appendChild(span);
+            
+            setTimeout(() => {
+                span.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                span.style.opacity = '1';
+                span.style.transform = 'translateY(0)';
+            }, 200 + (index * 120)); 
+        });
+
+        setTimeout(() => {
+            nameContainer.style.opacity = '1';
+        }, 100);
+
+        // 2. التوقيتات
+        // الثانية 3: إخفاء الاسم وإظهار اللوجو (بتأثير الليزر)
+        setTimeout(() => {
+            nameContainer.style.transition = 'opacity 0.5s ease';
+            nameContainer.style.opacity = '0';
+            
+            setTimeout(() => {
+                const flash = document.getElementById('flash');
+                flash.style.transition = 'opacity 0.15s';
+                flash.style.opacity = '0.6';
+                setTimeout(() => { flash.style.opacity = '0'; }, 150);
+
+                document.getElementById('logoContainer').classList.add('show');
+            }, 500);
+        }, 3000);
+
+        // الثانية 6: إخفاء اللوجو وإظهار الكلام
+        setTimeout(() => {
+            document.getElementById('logoContainer').style.opacity = '0';
+            document.getElementById('logoContainer').style.transform = 'scale(0.9)';
+            
+            setTimeout(() => {
+                document.getElementById('infoContainer').classList.add('show');
+                document.getElementById('timer').classList.add('show');
+            }, 500);
+        }, 6000);
+
+        // 3. العداد والتحويل
+        setTimeout(() => {
+            const interval = setInterval(() => {
+                countdown--;
+                timerDisplay.textContent = `REDIRECT: ${countdown}`;
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    window.location.href = PAY_LINK;
+                }
+            }, 1000);
+        }, 6000);
+
+        setTimeout(() => {
+            window.location.href = PAY_LINK;
+        }, totalTime);
+
+        // 4. النقاط (بتتطاير بسرعة)
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 6; // سرعة عالية
+                this.speedY = (Math.random() - 0.5) * 6;
+                this.color = `rgba(255, ${Math.floor(Math.random() * 50)}, 0, ${Math.random() * 0.8 + 0.2})`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > width || this.x < 0) this.speedX *= -1;
+                if (this.y > height || this.y < 0) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        const particleCount = window.innerWidth < 768 ? 40 : 100;
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
