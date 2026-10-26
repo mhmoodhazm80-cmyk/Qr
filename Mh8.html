@@ -1,1 +1,368 @@
-انا رقم ٨
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elgenius | Genius in One Field</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: #050505;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                linear-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* اسم Elgenius */
+        .name-container {
+            position: absolute;
+            font-size: clamp(2rem, 8vw, 7rem);
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: #ff0000;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.4);
+            opacity: 0;
+            display: flex;
+            gap: 5px;
+            direction: ltr;
+        }
+
+        .letter {
+            opacity: 0;
+            transform: translateY(20px) scale(0.5);
+            display: inline-block;
+        }
+
+        /* اللوجو */
+        .logo-container {
+            position: absolute;
+            width: 90%;
+            max-width: 650px;
+            opacity: 0;
+            transform: scale(0.8);
+            filter: blur(10px) brightness(0.2);
+            transition: all 2s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            mix-blend-mode: screen;
+            mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 95%);
+            -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 95%);
+        }
+
+        .logo-container.show {
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0px) brightness(1);
+        }
+
+        /* قسم الكلام */
+        .info-container {
+            position: absolute;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.5s ease-out;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .main-title {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 0, 0, 0.8);
+            margin-bottom: 10px;
+            font-weight: 900;
+        }
+
+        .sub-title {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: #ff0000;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .features span {
+            background: linear-gradient(90deg, rgba(255,0,0,0.1), rgba(0,0,0,0));
+            border-right: 3px solid #ff0000;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.1);
+            animation: slideIn 1s ease forwards;
+            opacity: 0;
+        }
+
+        .features span:nth-child(1) { animation-delay: 0.2s; }
+        .features span:nth-child(2) { animation-delay: 0.4s; }
+        .features span:nth-child(3) { animation-delay: 0.6s; }
+        .features span:nth-child(4) { animation-delay: 0.8s; }
+
+        .numbers {
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: rgba(10, 0, 0, 0.9);
+            border: 2px solid #ff0000;
+            padding: 15px 30px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.3), inset 0 0 15px rgba(255, 0, 0, 0.2);
+            direction: ltr;
+            color: #fff;
+        }
+
+        /* عداد صغير */
+        .timer {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 1rem;
+            color: #ff0000;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 1s;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .timer.show {
+            opacity: 1;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flash" id="flash"></div>
+    <canvas id="particles"></canvas>
+
+    <div class="container">
+        <div class="name-container" id="nameContainer"></div>
+
+        <div class="logo-container" id="logoContainer">
+            <!-- حط رابط الصورة هنا -->
+            <img src="logop.png" alt="Elgenius Logo">
+        </div>
+
+        <div class="info-container" id="infoContainer">
+            <div class="main-title">ELGENIUS</div>
+            <div class="sub-title">القوة في الأداء.. والاحترافية في الصيانة</div>
+            
+            <div class="features">
+                <span>صيانة لابتوبات وتوب</span>
+                <span>قطع غيار أصلية</span>
+                <span>تشخيص دقيق وسريع</span>
+                <span>ضمان على الخدمة</span>
+            </div>
+
+            <div class="numbers">
+                01016564907 - 01012537988<br>
+                +00237183211
+            </div>
+        </div>
+    </div>
+
+    <div class="timer" id="timer">جاري التحويل للواتساب: 11</div>
+
+    <script>
+        // الإعدادات
+        const NAME = "Elgenius";
+        const WA_LINK = "https://api.whatsapp.com/qr/O3IU2NOBE53DN1?autoload=1&app_absent=0";
+        const totalTime = 11000; // 11 ثانية
+        const timerDisplay = document.getElementById('timer');
+        let countdown = 11;
+
+        // 1. بناء الاسم حرف حرف
+        const nameContainer = document.getElementById('nameContainer');
+        NAME.split('').forEach((char, index) => {
+            const span = document.createElement('span');
+            span.className = 'letter';
+            span.textContent = char;
+            nameContainer.appendChild(span);
+            
+            setTimeout(() => {
+                span.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                span.style.opacity = '1';
+                span.style.transform = 'translateY(0) scale(1)';
+                span.style.textShadow = '0 0 10px #ff0000, 0 0 20px #ff0000';
+            }, 200 + (index * 150)); 
+        });
+
+        setTimeout(() => {
+            nameContainer.style.opacity = '1';
+        }, 100);
+
+        // 2. التأثيرات الزمنية
+        // الثانية 3: إخفاء الاسم وإظهار اللوجو
+        setTimeout(() => {
+            nameContainer.style.transition = 'opacity 0.5s ease';
+            nameContainer.style.opacity = '0';
+            
+            setTimeout(() => {
+                const flash = document.getElementById('flash');
+                flash.style.transition = 'opacity 0.2s';
+                flash.style.opacity = '0.3';
+                setTimeout(() => { flash.style.opacity = '0'; }, 200);
+
+                document.getElementById('logoContainer').classList.add('show');
+            }, 500);
+        }, 3000);
+
+        // الثانية 6: إخفاء اللوجو وإظهار الكلام
+        setTimeout(() => {
+            document.getElementById('logoContainer').style.transform = 'scale(0.9) translateY(-50px)';
+            document.getElementById('logoContainer').style.opacity = '0.3';
+            
+            setTimeout(() => {
+                document.getElementById('infoContainer').classList.add('show');
+                document.getElementById('timer').classList.add('show');
+            }, 500);
+        }, 6000);
+
+        // 3. العداد والتحويل
+        // بدء العداد في الثانية 6 (عشان يعد من 11 لـ 1 خلال 5 ثواني، ويحول في الثانية 11)
+        setTimeout(() => {
+            const interval = setInterval(() => {
+                countdown--;
+                timerDisplay.textContent = `جاري التحويل للواتساب: ${countdown}`;
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    window.location.href = WA_LINK;
+                }
+            }, 1000);
+        }, 6000);
+
+        // تأمين التحويل في الثانية 11
+        setTimeout(() => {
+            window.location.href = WA_LINK;
+        }, totalTime);
+
+        // 4. أنيميشن النقاط
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.color = `rgba(255, ${Math.floor(Math.random() * 50)}, 0, ${Math.random() * 0.5 + 0.5})`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > width) this.x = 0;
+                if (this.x < 0) this.x = width;
+                if (this.y > height) this.y = 0;
+                if (this.y < 0) this.y = height;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const particleCount = window.innerWidth < 768 ? 50 : 150;
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
